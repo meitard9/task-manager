@@ -89,4 +89,12 @@ export class UsersService {
   async findUserById(userId: string): Promise<UserDocument | null> {
     return this.userModel.findById(userId).exec();
   }
+  /**
+   * Retrieves all users from the database.
+   *
+   * @returns A promise that resolves to an array of UserDocuments.
+   */
+  async getAllUsers(): Promise<UserDocument[]> {
+    return this.userModel.find().exec();
+  }
 }

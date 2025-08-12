@@ -9,6 +9,15 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { Payload } from '../dto/payload.dto';
 
+// The refresh token is in the cookie, so we need a custom token extractor.
+const fromCookie = (req: Request): string | null => {
+  if (req.cookies && req.cookies['refreshToken']) {
+    return req.cookies['refreshToken'] as string;
+  }
+  // If no token is found in the cookie, return null.
+  return null;
+};
+
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
@@ -16,19 +25,23 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(private configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([
-        //TODO : verify and replace assumption : & { cookies: { refreshToken: string } }
-        (req: Request & { cookies: { refreshToken: string } }) => {
-          //TODO: check
-          return req?.cookies?.refreshToken;
-        },
-      ]),
+      // jwtFromRequest: ExtractJwt.fromExtractors([
+      //   //TODO : verify and replace assumption : & { cookies: { refreshToken: string } }
+      //   (req: Request & { cookies: { refreshToken: string } }) => {
+      //     //TODO: check
+      //     return req?.cookies?.refreshToken;
+      //   },
+      // ]),
+      jwtFromRequest: fromCookie,
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('JWT_REFRESH_SECRET'),
     } as StrategyOptionsWithoutRequest);
   }
 
   validate(payload: Payload) {
+    console.log('jwt-strategy - validate');
+    console.log(payload);
+
     //TODO: You might want to do additional checks here, e.g., if the user still exists in the DB
     if (!payload) {
       throw new UnauthorizedException(

@@ -14,9 +14,10 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { Request, Response } from 'express';
 import { RegisterDto } from './dto/register.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { userDto } from './dto/user.dto';
+import { UserDto } from './dto/user.dto';
+import { JwtRequestDto } from './dto/jwt.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -36,8 +37,16 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  /**
+   * Logs in a user and sets a refresh token cookie.
+   *
+   * @param user the user object from the CurrentUser decorator
+   * @param res the response object, used to set the refresh token cookie
+   * @returns a promise that resolves to an object with an accessToken property
+   * @throws UnauthorizedException if the user does not exist or the login fails
+   */
   async login(
-    @CurrentUser() user: userDto,
+    @CurrentUser() user: UserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     //TODO fix error messages
@@ -51,9 +60,10 @@ export class AuthController {
     //   throw new UnauthorizedException('user dont have email or id');
     // }
     const loginUser = await this.authService.login(user);
-    // if (!loginUser) {
-    //   throw new UnauthorizedException('loginUser is null');
-    // }
+    console.log(loginUser);
+    if (!loginUser) {
+      throw new UnauthorizedException('loginUser is null');
+    }
     const { accessToken, refreshToken } = loginUser as {
       accessToken: string;
       refreshToken: string;
@@ -84,7 +94,7 @@ export class AuthController {
   async refreshTokens(
     //TODO : verify and replace assumption : & { user: { sub: string }; cookies: { refreshToken: string }
     @Req()
-    req: Request & { user: { sub: string }; cookies: { refreshToken: string } },
+    req: JwtRequestDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     console.log('controller - refresh');
@@ -114,7 +124,7 @@ export class AuthController {
   async logout(
     //TODO : verify and replace assumption : & { user: { sub: string }; cookies: { refreshToken: string }
     @Req()
-    req: Request & { user: { sub: string }; cookies: { refreshToken: string } },
+    req: JwtRequestDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const userId = req.user['sub'];
@@ -137,7 +147,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('profile')
   //TODO : verify and replace assumption : & { user: string }
-  getProfile(@Req() req: Request & { user: string }) {
-    return req.user;
+  getProfile(@Req() req: { user: UserDto }) {
+    console.log('controller - profile');
+    console.log('user---', req.user);
+    return { email: req.user.email, _id: req.user._id }; //req.user.email;//TODO:  front expects an object, and is id is require? and make a object for safeReturnData or somtheing
   }
 }
