@@ -8,21 +8,21 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 
 export default function DashboardPage() {
   const { user, isLoading, error, logout } = useUserSession();
-  const { accessToken } = useAuth();
-  //const router = useRouter();
+  // const { accessToken } = useAuth();
+  // //const router = useRouter();
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  // if (isLoading) {
+  //   return <LoadingSpinner />;
+  // }
 
-  if (!accessToken) {
-    // This handles the case where the session provider couldn't get a token.
-    // The user will be redirected by the provider, but this prevents a quick flash.
-    // return (
-    //   <p className="text-center text-red-500 mt-10">Redirecting to login...</p>
-    // );
-    return null;
-  }
+  // if (!accessToken) {
+  //   // This handles the case where the session provider couldn't get a token.
+  //   // The user will be redirected by the provider, but this prevents a quick flash.
+  //   // return (
+  //   //   <p className="text-center text-red-500 mt-10">Redirecting to login...</p>
+  //   // );
+  //   return null;
+  // }
 
   return (
     <div className="p-8">

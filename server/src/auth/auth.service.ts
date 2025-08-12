@@ -5,7 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 //import { UserDocument } from '../users/schemas/user.schema';
 import { UserWithoutPassword } from './dto/payload.dto';
-import { userDto } from './dto/user.dto';
+import { UserDto } from './dto/user.dto';
 import { v4 as uuidv4 } from 'uuid'; // npm install uuid @types/uuid
 import { jwtDto } from './dto/jwt.dto';
 
@@ -45,7 +45,7 @@ export class AuthService {
    * The jti and expiration date of the refresh token are stored in the user's database record.
    * The method returns an object containing the access token and the refresh token.
    */
-  async login(user: userDto) {
+  async login(user: UserDto) {
     console.log('service - login');
     if (!user) {
       //TODO: fix exception
